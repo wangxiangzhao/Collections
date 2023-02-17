@@ -33,12 +33,9 @@ class XDSelectorCardViewCell: XDBaseCollectionViewCell {
     //x轴方向的阻尼默认是1
     private var xDamp: CGFloat = 1
     private var roatedAngle: CGFloat = 0
-    private var initFrame: CGRect = .zero
  
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        initFrame = frame
         
         contentView.layer.cornerRadius = 20
         
@@ -56,14 +53,15 @@ class XDSelectorCardViewCell: XDBaseCollectionViewCell {
         let point = sender.translation(in: view)
         let state = sender.state
         let yDamp: CGFloat = 0.3
-        let offset = view.frame.minX - initFrame.minX
+        
+        view.transform = view.transform.translatedBy(x: point.x * xDamp, y: point.y * yDamp)
+        let offset = view.transform.tx
         let absOffset = abs(offset)
         var select: XDCardSelect = .none
-        if absOffset >= 0 && absOffset <= minOffset {
-            select = .none
+        if absOffset <= minOffset {
             xDamp = 1 - 0.6 * absOffset / minOffset
         } else {
-            select = offset > 0 ? .right : .left
+            select = offset > 0  ? .right : .left
             xDamp = 0.4
         }
         
@@ -75,7 +73,7 @@ class XDSelectorCardViewCell: XDBaseCollectionViewCell {
         } else {
             roatedAngle += roate
         }
-        view.transform = view.transform.translatedBy(x: point.x * xDamp, y: point.y * yDamp)
+        
         if abs(roatedAngle) != maxRoateDegress {
             view.transform = view.transform.concatenating(CGAffineTransform(rotationAngle: roate))
         }
